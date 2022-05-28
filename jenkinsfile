@@ -1,0 +1,31 @@
+pipeline {
+    agent { label 'jdk11' }
+    options {
+        timeout( time: 1, unit: 'Hours')
+        retry(2)
+    }
+    Triggers {
+        cron ( '0 * * * *' )
+    }
+
+    stages {
+        stage( 'source code' )
+        steps {
+            git url: 'https://github.com/sainath335/spring-petclinic.git',
+            branch: 'main'
+        }
+    }
+    stage( 'Build the code ')
+    steps {
+        sh script: 'mvn clean package'
+    }
+    stage( 'reporting')
+    steps {
+        junit testResults: 'target/surefire-reports/*.xml'
+    }
+    stage( 'archive the artifactory' )
+    steps {
+        Archive Artifacts: '**/*.war'
+    } 
+}
+   
