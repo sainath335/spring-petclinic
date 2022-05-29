@@ -7,23 +7,25 @@ pipeline {
     Triggers {
         cron ( '0 * * * *' )
     }
-
     stages {
-        stage( 'source code' )
-        steps {
-            git url: 'https://github.com/spring-projects/spring-petclinic.git',
-            branch: 'main'
+        stage( 'source code' ) {
+            steps {
+                git url: 'https://github.com/spring-projects/spring-petclinic.git',
+                branch: 'main'
+            }
         }
-    }
-    stage( 'Build the code and sonarqube-analysis ')
-    steps {
-        withSonarQubeEnv( 'SONAR_LATEST') {
-            sh script: "mvn clean package sonar:sonar"
+        stage( 'Build the code and sonarqube-analysis ') {
+            steps {
+                withSonarQubeEnv( 'SONAR_LATEST') {
+                    sh script: "mvn clean package sonar:sonar"
+                }    
+            }
         }
-    }
-    stage( 'reporting')
-    steps {
-        junit testResults: 'target/surefire-reports/*.xml'
+        stage( 'reporting') {
+            steps {
+                junit testResults: 'target/surefire-reports/*.xml'
+            }    
+        }    
     }
     // stage( 'archive the artifactory' )
     // steps {
