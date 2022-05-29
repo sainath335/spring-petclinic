@@ -11,13 +11,15 @@ pipeline {
     stages {
         stage( 'source code' )
         steps {
-            git url: 'https://github.com/sainath335/spring-petclinic.git',
+            git url: 'https://github.com/spring-projects/spring-petclinic.git',
             branch: 'main'
         }
     }
-    stage( 'Build the code ')
+    stage( 'Build the code and sonarqube-analysis ')
     steps {
-        sh script: 'mvn clean package'
+        withSonarQubeEnv( 'SONAR_LATEST') {
+            sh script: "mvn clean package sonar:sonar"
+        }
     }
     stage( 'reporting')
     steps {
