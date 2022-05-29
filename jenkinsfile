@@ -25,9 +25,9 @@ pipeline {
     steps {
         junit testResults: 'target/surefire-reports/*.xml'
     }
-    stage( 'archive the artifactory' )
-    steps {
-        Archive Artifacts: '**/*.war'
-    } 
+    // stage( 'archive the artifactory' )
+    // steps {
+    //     Archive Artifacts: '**/*.war'
+    // } 
 }
    
