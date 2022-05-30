@@ -1,37 +1,49 @@
 pipeline {
-    agent { label 'JDK11' }
+    agent { label 'jdk11' }
     options { 
         timeout(time: 1, unit: 'HOURS')
-        retry(2) 
+        
     }
     triggers {
         cron('0 * * * *')
     }
-    parameters {
-        choice(name: 'GOAL', choices: ['compile', 'package', 'clean package'])
-    }
     stages {
         stage('Source Code') {
             steps {
-                git url: 'https://github.com/GitPracticeRepo/spring-petclinic.git', 
-                branch: 'main'
+                git url: 'https://github.com/GitPracticeRepo/openmrs-core.git', 
+                branch: 'master'
             }
 
         }
-        stage('Build the Code and sonarqube-analysis') {
+        stage('Artifactory-Configuration') {
             steps {
-                withSonarQubeEnv('SONAR_LATEST') {
-                    sh script: "mvn ${params.GOAL} sonar:sonar"
-                }
+                rtMavenDeployer (
+                    id: 'spc-deployer',
+                    serverId: 'JFROG_INSTANCE',
+                    releaseRepo: 'libs-release-local',
+                    snapshotRepo: 'libs-snapshot-local',
 
+                )
             }
         }
+         stage('Build the Code and sonarqube-analysis') {
+             steps {
+            rtMavenRun (
+
+                    tool: 'MVN_DEFAULT',
+                    pom: 'pom.xml',
+                    goals: 'clean install',
+                    deployerId: 'spc-deployer',
+                )
+
+             }
+         }
         stage('reporting') {
             steps {
-                junit testResults: 'target/surefire-reports/*.xml'
+                junit testResults: '**/surefire-reports/*.xml'
             }
         }
-
+        
     }
 
 }
